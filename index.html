@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Морской бой</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-phase="place">
+<main>
+  <header>
+    <h1>Морской бой</h1>
+    <p id="msg" role="status" aria-live="polite"></p>
+    <p id="count"></p>
+  </header>
+
+  <div class="controls">
+    <button id="auto">Расставить случайно</button>
+    <button id="rot">Повернуть</button>
+    <button id="clear">Очистить</button>
+    <button id="start" class="primary">В бой</button>
+    <button id="new">Новая игра</button>
+  </div>
+
+  <div class="boards">
+    <section id="meWrap">
+      <h2>Ваш флот</h2>
+      <div id="me" class="board"></div>
+    </section>
+    <section id="enemyWrap">
+      <h2>Флот соперника</h2>
+      <div id="enemy" class="board"></div>
+    </section>
+  </div>
+
+  <p class="rules">
+    Флот: один четырёхпалубный, два трёхпалубных, три двухпалубных и четыре однопалубных корабля.
+    Корабли не могут касаться друг друга, даже углами. Попали — стреляете ещё раз, промахнулись — ход переходит сопернику.
+    Клавиша R поворачивает корабль при расстановке. Партия сохраняется автоматически.
+  </p>
+</main>
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
