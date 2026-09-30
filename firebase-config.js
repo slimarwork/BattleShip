@@ -7,5 +7,4 @@ const FIREBASE_CONFIG = {
   storageBucket: "battleship-7b798.firebasestorage.app",
   messagingSenderId: "756687214260",
   appId: "1:756687214260:web:0170aabf4d9eb73198a9e1",
-  measurementId: "G-YYQGH3ZD9Z"
 };
