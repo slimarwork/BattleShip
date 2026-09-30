@@ -6,8 +6,21 @@
 <title>Морской бой</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-phase="place">
-<main>
+<body data-phase="place" data-screen="menu">
+<main id="menu">
+  <h1>Морской бой</h1>
+  <p id="user"></p>
+  <div class="menu-list">
+    <button id="login">Войти через Google</button>
+    <button id="playBot" class="primary">Играть с компьютером</button>
+    <button id="create">Создать комнату для друга</button>
+    <div class="join">
+      <input id="code" maxlength="5" placeholder="КОД" aria-label="Код комнаты" autocomplete="off">
+      <button id="join">Войти по коду</button>
+    </div>
+  </div>
+</main>
+<main id="game">
   <header>
     <h1>Морской бой</h1>
     <p id="msg" role="status" aria-live="polite"></p>
@@ -20,6 +33,7 @@
     <button id="clear">Очистить</button>
     <button id="start" class="primary">В бой</button>
     <button id="new">Новая игра</button>
+    <button id="menuBtn">← Меню</button>
   </div>
 
   <div class="boards">
@@ -39,7 +53,12 @@
     Клавиша R поворачивает корабль при расстановке. Партия сохраняется автоматически.
   </p>
 </main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="logic.js"></script>
+<script src="online.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

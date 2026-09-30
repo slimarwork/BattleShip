@@ -11,6 +11,7 @@ let G, timer;
 const fresh = () => ({ phase: 'place', turn: 'me', horiz: true, me: newBoard(), bot: randomFleet(), msg: '' });
 
 function save() {
+  if (G && G.online) return;
   try { localStorage.setItem(KEY, JSON.stringify(G)); } catch (e) { /* хранилище недоступно */ }
 }
 function load() {
@@ -52,10 +53,13 @@ function render() {
   $('msg').textContent = G.msg;
   $('count').textContent = placing
     ? `Расставлено: ${placed} из ${FLEET.length}`
-    : `Ваши корабли: ${alive(G.me)} · Корабли соперника: ${alive(G.bot)}`;
+    : G.online ? `Комната ${G.code} · Ваши корабли: ${alive(G.me)}`
+      : `Ваши корабли: ${alive(G.me)} · Корабли соперника: ${alive(G.bot)}`;
   $('auto').hidden = $('rot').hidden = $('clear').hidden = !placing;
   $('start').hidden = !(placing && full);
   $('rot').textContent = 'Повернуть: ' + (G.horiz ? 'горизонтально' : 'вертикально');
+  $('start').textContent = G.online ? 'Готов' : 'В бой';
+  $('new').hidden = !!G.online;
   $('enemyWrap').classList.toggle('off', placing);
   $('enemy').classList.toggle('active', G.phase === 'play' && G.turn === 'me');
   drawBoard($('me'), G.me, true);
@@ -87,7 +91,7 @@ function placeAt(r, c) {
   save(); render();
 }
 function rotate() {
-  if (G.phase !== 'place') return;
+  if (!G || G.phase !== 'place') return;
   G.horiz = !G.horiz;
   save(); render();
 }
@@ -141,13 +145,14 @@ $('me').addEventListener('mouseover', e => {
 $('me').addEventListener('mouseleave', clearPreview);
 $('enemy').addEventListener('click', e => {
   const t = e.target.closest('.cell');
-  if (t) fire(+t.dataset.r, +t.dataset.c);
+  if (t) (G.online ? onlineFire : fire)(+t.dataset.r, +t.dataset.c);
 });
 
 $('auto').onclick = () => { G.me = randomFleet(); save(); render(); };
 $('clear').onclick = () => { G.me = newBoard(); save(); render(); };
 $('rot').onclick = rotate;
 $('start').onclick = () => {
+  if (G.online) return onlineReady();
   if (G.me.ships.length !== FLEET.length) return;
   G.phase = 'play';
   G.turn = 'me';
@@ -164,8 +169,27 @@ document.addEventListener('keydown', e => {
   if (['r', 'к'].includes(e.key.toLowerCase())) rotate();
 });
 
-/* ---------- запуск ---------- */
-G = load() || fresh();
-save();
-render();
-if (G.phase === 'play' && G.turn === 'bot') timer = setTimeout(botTurn, 700); // продолжить после перезагрузки
+/* ---------- меню ---------- */
+const showScreen = s => { document.body.dataset.screen = s; };
+const showGame = () => showScreen('game');
+
+function goMenu() {
+  clearTimeout(timer);
+  leaveRoom();
+  showScreen('menu');
+  renderMenu();
+}
+function startBot() {
+  G = load() || fresh();
+  $('enemyWrap').querySelector('h2').textContent = 'Флот соперника';
+  showGame(); save(); render();
+  if (G.phase === 'play' && G.turn === 'bot') timer = setTimeout(botTurn, 700); // продолжить после перезагрузки
+}
+$('playBot').onclick = startBot;
+$('menuBtn').onclick = goMenu;
+$('login').onclick = () => (fbUser ? firebase.auth().signOut() : signIn());
+$('create').onclick = createRoom;
+$('join').onclick = () => joinRoom($('code').value);
+
+fbOn = fbInit();
+renderMenu();

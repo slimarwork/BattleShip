@@ -69,3 +69,32 @@ section.off { opacity: .45; }
 @media (max-width: 640px) {
   body[data-phase="play"] #enemyWrap, body[data-phase="over"] #enemyWrap { order: -1; }
 }
+
+/* ---------- меню и оформление ---------- */
+body {
+  background-image:
+    linear-gradient(rgba(18, 48, 74, .06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 48, 74, .06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+body[data-screen="menu"] #game, body[data-screen="game"] #menu { display: none; }
+#menu { text-align: center; padding-top: 8vh; }
+#menu h1 { font-size: clamp(40px, 10vw, 68px); }
+#user { opacity: .8; margin: 0; }
+.menu-list { display: grid; gap: 12px; max-width: 340px; margin: 28px auto 0; }
+#menu button, #menu input {
+  font: inherit; padding: 13px 16px; border: 1.5px solid var(--ink); border-radius: 8px;
+  background: rgba(255, 255, 255, .5); color: var(--ink);
+}
+#menu button { cursor: pointer; }
+#menu button:hover:not(:disabled) { background: rgba(18, 48, 74, .1); }
+#menu .primary { background: var(--ink); color: var(--paper); }
+#menu .primary:hover:not(:disabled) { background: #1d4468; }
+#menu button:disabled, #menu input:disabled { opacity: .4; cursor: not-allowed; }
+#menu button[hidden] { display: none; }
+.join { display: flex; gap: 8px; }
+.join input { flex: 1; min-width: 0; text-align: center; text-transform: uppercase; letter-spacing: .2em; }
+@keyframes pop { from { transform: scale(.3); opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .hit::after, .miss::after { animation: pop .25s ease-out; }
+}
