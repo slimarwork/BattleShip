@@ -98,3 +98,13 @@ body[data-screen="menu"] #game, body[data-screen="game"] #menu { display: none; 
 @media (prefers-reduced-motion: no-preference) {
   .hit::after, .miss::after { animation: pop .25s ease-out; }
 }
+
+/* ---------- анимация победы ---------- */
+.win { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+.win i { position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 2px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+.win-text {
+  position: absolute; top: 28%; width: 100%; text-align: center;
+  font: 700 clamp(48px, 14vw, 120px)/1 Georgia, "Times New Roman", serif; color: var(--ink);
+  text-shadow: 0 2px 0 #fff, 0 0 30px rgba(255, 255, 255, .8); animation: pop .5s ease-out;
+}

@@ -6,7 +6,7 @@ const NAMES = { 4: 'четырёхпалубный', 3: 'трёхпалубны�
 const $ = id => document.getElementById(id);
 const at = (r, c) => LETTERS[c] + (r + 1);
 
-let G, timer;
+let G, timer, celebrated = false;
 
 const fresh = () => ({ phase: 'place', turn: 'me', horiz: true, me: newBoard(), bot: randomFleet(), msg: '' });
 
@@ -64,6 +64,8 @@ function render() {
   $('enemy').classList.toggle('active', G.phase === 'play' && G.turn === 'me');
   drawBoard($('me'), G.me, true);
   drawBoard($('enemy'), G.bot, false);
+  if (G.phase !== 'over') celebrated = false;
+  else if (!celebrated && G.msg.startsWith('Победа')) { celebrated = true; celebrate(); }
   if (G.online) saveOnline();
 }
 
@@ -199,3 +201,15 @@ fbOn = fbInit();
 renderMenu();
 // После обновления страницы возвращаемся туда, где были (онлайн-партия вернётся после входа в аккаунт).
 if (localStorage.getItem('morskoy-screen') === 'bot') startBot();
+
+/* ---------- анимация победы ---------- */
+function celebrate() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = document.createElement('div');
+  box.className = 'win';
+  box.innerHTML = '<div class="win-text">Победа!</div>' + Array.from({ length: 90 }, () =>
+    `<i style="left:${rnd(100)}%;background:hsl(${rnd(360)} 80% 55%);animation-delay:${(Math.random() * 1.2).toFixed(2)}s;animation-duration:${(2 + Math.random() * 2).toFixed(2)}s"></i>`
+  ).join('');
+  document.body.append(box);
+  setTimeout(() => box.remove(), 5200);
+}
