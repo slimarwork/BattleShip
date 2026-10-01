@@ -2,6 +2,11 @@
 /* Онлайн-режим (Firebase). Расстановка игрока не покидает его устройство:
    стреляющий пишет выстрел в комнату, защищающийся сам считает результат и пишет ответ. */
 
+// Вход и сайт должны быть на одном домене, иначе Safari/iPhone блокирует вход.
+if (location.hostname.endsWith('.web.app')) {
+  location.replace('https://' + location.hostname.replace('.web.app', '.firebaseapp.com') + location.pathname + location.search);
+}
+
 let fbUser = null, fbOn = false, role = null, roomRef = null;
 let seq = 0, lastShot = 0, lastRes = 0, pending = false;
 
@@ -9,11 +14,19 @@ function fbInit() {
   if (typeof firebase === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('ВСТАВЬ')) return false;
   if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
   firebase.auth().onAuthStateChanged(u => { fbUser = u; renderMenu(); });
+  firebase.auth().getRedirectResult().catch(e => alert('Не удалось войти: ' + e.message));
   return true;
 }
 function signIn() {
-  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e => alert('Не удалось войти: ' + e.message));
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(e => {
+    // Телефоны часто блокируют всплывающее окно — тогда входим через переход на страницу Google.
+    if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes(e.code)) {
+      firebase.auth().signInWithRedirect(provider);
+    } else if (!['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(e.code)) {
+      alert('Не удалось войти: ' + e.message);
+    }
+  });
 }
 function renderMenu() {
   $('user').textContent = !fbOn ? 'Онлайн-режим не настроен (заполните firebase-config.js)'
