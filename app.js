@@ -64,6 +64,7 @@ function render() {
   $('enemy').classList.toggle('active', G.phase === 'play' && G.turn === 'me');
   drawBoard($('me'), G.me, true);
   drawBoard($('enemy'), G.bot, false);
+  if (G.online) saveOnline();
 }
 
 /* ---------- расстановка ---------- */
@@ -170,7 +171,10 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---------- меню ---------- */
-const showScreen = s => { document.body.dataset.screen = s; };
+const showScreen = s => {
+  document.body.dataset.screen = s;
+  try { localStorage.setItem('morskoy-screen', s === 'game' ? (G && G.online ? 'online' : 'bot') : 'menu'); } catch (e) {}
+};
 const showGame = () => showScreen('game');
 
 function goMenu() {
@@ -193,3 +197,5 @@ $('join').onclick = () => joinRoom($('code').value);
 
 fbOn = fbInit();
 renderMenu();
+// После обновления страницы возвращаемся туда, где были (онлайн-партия вернётся после входа в аккаунт).
+if (localStorage.getItem('morskoy-screen') === 'bot') startBot();

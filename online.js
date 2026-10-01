@@ -13,7 +13,10 @@ let seq = 0, lastShot = 0, lastRes = 0, pending = false;
 function fbInit() {
   if (typeof firebase === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('ВСТАВЬ')) return false;
   if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-  firebase.auth().onAuthStateChanged(u => { fbUser = u; renderMenu(); });
+  firebase.auth().onAuthStateChanged(u => {
+    fbUser = u; renderMenu();
+    if (u && !G && localStorage.getItem('morskoy-screen') === 'online') resumeOnline();
+  });
   firebase.auth().getRedirectResult().catch(e => alert('Не удалось войти: ' + e.message));
   return true;
 }
@@ -73,6 +76,7 @@ function enter(code, r) {
 function leaveRoom() {
   if (roomRef) { roomRef.off(); roomRef.remove().catch(() => {}); }
   roomRef = null; role = null;
+  try { localStorage.removeItem('morskoy-online'); } catch (e) {}
 }
 
 /* ---------- синхронизация ---------- */
@@ -149,4 +153,22 @@ function applyRes(x) {
     }
   });
   G.msg = `${w}: убил! Стреляйте ещё.`;
+}
+
+/* ---------- восстановление онлайн-партии после обновления страницы ---------- */
+function saveOnline() {
+  try { localStorage.setItem('morskoy-online', JSON.stringify({ G, role, lastShot, lastRes, pending })); } catch (e) {}
+}
+function resumeOnline() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem('morskoy-online')); } catch (e) {}
+  if (!s || !s.G || !s.G.code) return;
+  const ref = firebase.database().ref('rooms/' + s.G.code);
+  ref.get().then(snap => {
+    if (!snap.exists() || G) { try { localStorage.removeItem('morskoy-online'); } catch (e) {} return; }
+    role = s.role; lastShot = s.lastShot; lastRes = s.lastRes; pending = s.pending;
+    G = s.G; roomRef = ref;
+    showGame(); render();
+    roomRef.on('value', onRoom);
+  }).catch(() => {});
 }
